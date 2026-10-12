@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_db
+    username: postgres
+    password: ${DB_PASSWORD:saini18}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      properties:
+        max.block.ms: 3000
+
+server:
+  port: 8081
+
+jwt:
+  # Base64 string that decodes to at least 32 bytes. Must be identical in api-gateway.
+  # Generate your own with:  openssl rand -base64 32
+  secret: ${JWT_SECRET:MJ4SvzT+fphLSPAuhOaSIvE1qEOUprYw1Mkd9w+2cFM=}
+  expiration: 86400000          # access token: 24 hours
+  refresh-expiration: 604800000 # refresh token: 7 days
+
+wallet:
+  initial-balance: 10000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

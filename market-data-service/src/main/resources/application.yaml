@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: market-data-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/market_db
+    username: postgres
+    password: ${DB_PASSWORD:saini18}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      properties:
+        # don't let a down broker freeze the price scheduler for 60s per tick
+        max.block.ms: 3000
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8082
+
+market:
+  price-update-interval: 2000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          # Never trust an X-User-Id sent by a client; JwtAuthFilter sets the real one.
+          default-filters:
+            - RemoveRequestHeader=X-User-Id
+          routes:
+
+            # USER-SERVICE (public: no JWT needed)
+            - id: user-service-public
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/v1/users/register, /api/v1/users/login
+
+            # USER-SERVICE
+            - id: user-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/v1/users/**
+              filters:
+                - JwtAuthFilter
+
+            # MARKET-SERVICE
+            - id: market-data-service
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/v1/market/**
+              filters:
+                - JwtAuthFilter
+
+            # WEBSOCKET
+            - id: market-websocket
+              uri: ws://localhost:8082
+              predicates:
+                - Path=/ws/**
+
+            # ORDER-SERVICE
+            - id: order-service
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/v1/orders/**
+              filters:
+                - JwtAuthFilter
+
+            # PORTFOLIO-SERVICE
+            - id: portfolio-service
+              uri: http://localhost:8084
+              predicates:
+                - Path=/api/v1/portfolio/**
+              filters:
+                - JwtAuthFilter
+
+server:
+  port: 8080
+
+jwt:
+  # Base64 string that decodes to at least 32 bytes. Must be identical in user-service.
+  # Generate your own with:  openssl rand -base64 32
+  secret: ${JWT_SECRET:MJ4SvzT+fphLSPAuhOaSIvE1qEOUprYw1Mkd9w+2cFM=}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
